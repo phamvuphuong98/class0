@@ -54,7 +54,7 @@ pub mod pallet {
 	pub enum Event<T: Config> {
 		/// Event documentation should end with an array that provides descriptive names for event
 		/// parameters. [something, who]
-		MemberRegistered(Option<User>, T::AccountId),
+		MemberRegistered(Vec<u8>, T::AccountId),
 	}
 
 	// Errors inform users that something went wrong.
@@ -90,7 +90,7 @@ pub mod pallet {
             Something::<T>::insert( &who,Some(user_new));
 
 			// Emit an event.
-			Self::deposit_event(Event::MemberRegistered(Some(user_new), who));
+			Self::deposit_event(Event::MemberRegistered(name_clone, who));
 			// Return a successful DispatchResultWithPostInfo
 			Ok(())
 		}
