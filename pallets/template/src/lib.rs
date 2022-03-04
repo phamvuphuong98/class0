@@ -55,12 +55,14 @@ pub mod pallet {
 		/// Event documentation should end with an array that provides descriptive names for event
 		/// parameters. [something, who]
 		MemberRegistered(Vec<u8>, T::AccountId),
+		RemoveMemberRegistered(T::AccountId),
 	}
 
 	// Errors inform users that something went wrong.
 	#[pallet::error]
 	pub enum Error<T> {
 		MemberAlreadyRegister,
+		MemberNotRegistered
 	}
 
 	// Dispatchable functions allows users to interact with the pallet and invoke state changes.
@@ -86,11 +88,28 @@ pub mod pallet {
 				name: name,
 				age: age
 			};
-            // Store the proof with the sender and block number.
+
             Something::<T>::insert( &who,Some(user_new));
 
 			// Emit an event.
 			Self::deposit_event(Event::MemberRegistered(name_clone, who));
+			// Return a successful DispatchResultWithPostInfo
+			Ok(())
+		}
+
+		#[pallet::weight(10_000 + T::DbWeight::get().writes(1))]
+		pub fn remove(origin: OriginFor<T>) -> DispatchResult {
+			// Check that the extrinsic was signed and get the signer.
+			// This function will return an error if the extrinsic is not signed.
+			// https://docs.substrate.io/v3/runtime/origins
+			let who = ensure_signed(origin)?;
+			// Verify that the specified proof has not already been claimed.
+            ensure!(Something::<T>::contains_key(&who), Error::<T>::MemberNotRegistered);
+
+            Something::<T>::remove( &who);
+
+			// Emit an event.
+			Self::deposit_event(Event::RemoveMemberRegistered(who));
 			// Return a successful DispatchResultWithPostInfo
 			Ok(())
 		}
